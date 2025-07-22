@@ -203,7 +203,7 @@ export default function HomePage() {
               <Link href="/cart">
                 <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative group">
                   <ShoppingCart className="w-5 h-5" />
-                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gradient-to-r from-red-500 to-red-700 text-xs animate-pulse">
+                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gradient-to-r from-red-500 to-red-700 text-xs animate-pulse flex items-center justify-center">
                     {cartState.itemCount}
                   </Badge>
                   <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
