@@ -91,12 +91,33 @@ export default function ProductsPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("name")
   const [filteredProducts, setFilteredProducts] = useState(products)
+  const [searchFocused, setSearchFocused] = useState(false)
+
+  // Enhanced fuzzy search
+  const fuzzySearch = (text: string, searchTerm: string) => {
+    if (!searchTerm) return true
+    
+    const searchLower = searchTerm.toLowerCase()
+    const textLower = text.toLowerCase()
+    
+    // Exact match
+    if (textLower.includes(searchLower)) return true
+    
+    // Fuzzy match - check if characters appear in order
+    let searchIndex = 0
+    for (let i = 0; i < textLower.length && searchIndex < searchLower.length; i++) {
+      if (textLower[i] === searchLower[searchIndex]) {
+        searchIndex++
+      }
+    }
+    return searchIndex === searchLower.length
+  }
 
   useEffect(() => {
     const filtered = products.filter(
       (product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase()),
+        fuzzySearch(product.name, searchQuery) ||
+        fuzzySearch(product.category, searchQuery),
     )
 
     // Sort products
@@ -115,6 +136,10 @@ export default function ProductsPage() {
 
     setFilteredProducts(filtered)
   }, [searchQuery, sortBy])
+
+  const suggestedProducts = searchQuery && filteredProducts.length === 0 
+    ? products.slice(0, 3) // Show first 3 as suggestions
+    : []
 
   const handleAddToCart = (product: typeof products[0], e: React.MouseEvent) => {
     e.preventDefault() // Prevent navigation when clicking the button
@@ -185,11 +210,26 @@ export default function ProductsPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <Input
                     type="text"
-                    placeholder="Search products..."
+                    placeholder="🏁 Search F1 gear..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-red-600"
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    className={`pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 transition-all duration-300 ${
+                      searchFocused ? 'border-red-500 shadow-lg shadow-red-500/20' : 'focus:border-red-600'
+                    }`}
                   />
+                  {searchFocused && (
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="absolute top-full left-0 right-0 bg-gray-800 border border-gray-700 rounded-b-lg p-2 mt-1 z-10"
+                    >
+                      <p className="text-xs text-gray-400 font-mono">
+                        💡 Try: "Monaco", "Racing", "Cap", etc.
+                      </p>
+                    </motion.div>
+                  )}
                 </div>
               </div>
 
@@ -232,15 +272,74 @@ export default function ProductsPage() {
         <section className="py-12">
           <div className="container mx-auto px-4">
             {filteredProducts.length === 0 ? (
-              <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20">
-                <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Search className="w-12 h-12 text-gray-400" />
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                className="text-center py-20"
+              >
+                {/* F1-Themed Empty State */}
+                <div className="relative w-32 h-32 mx-auto mb-8">
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 rounded-full opacity-20 animate-pulse" />
+                  <div className="absolute inset-4 bg-gray-800 rounded-full flex items-center justify-center">
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                      className="w-12 h-12 border-4 border-red-500 rounded-full border-t-transparent"
+                    />
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Search className="w-8 h-8 text-red-400" />
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-gray-300">No products found</h3>
-                <p className="text-gray-400 mb-6">Try adjusting your search terms or browse our categories</p>
-                <Button onClick={() => setSearchQuery("")} className="bg-red-600 hover:bg-red-700">
-                  Clear Search
-                </Button>
+
+                <motion.h3 
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-3xl font-black mb-4 text-red-400 tracking-wider"
+                >
+                  🏁 TIRES SCREECH TO A HALT
+                </motion.h3>
+                
+                <p className="text-xl text-gray-300 mb-6 font-mono">
+                  NO RESULTS FOUND — TRY ANOTHER GEAR?
+                </p>
+
+                {suggestedProducts.length > 0 && (
+                  <div className="mb-8">
+                    <p className="text-gray-400 mb-4 font-mono tracking-wider">
+                      🔧 SUGGESTED GEAR FROM THE PIT:
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      {suggestedProducts.map((product) => (
+                        <Button
+                          key={product.id}
+                          variant="outline"
+                          size="sm"
+                          className="border-red-600/50 text-red-400 hover:bg-red-600/10"
+                          onClick={() => setSearchQuery(product.name)}
+                        >
+                          {product.name}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button 
+                    onClick={() => setSearchQuery("")} 
+                    className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 font-bold tracking-wider"
+                  >
+                    🏎️ RESTART ENGINE
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="border-red-600/50 text-red-400 hover:bg-red-600/10"
+                  >
+                    🏁 BROWSE ALL GEAR
+                  </Button>
+                </div>
               </motion.div>
             ) : (
               <div

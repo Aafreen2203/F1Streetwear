@@ -1,14 +1,15 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ShoppingCart, User, Search, Heart, Zap, Trophy, Flag, Play } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { motion, useScroll, useTransform, useInView } from "framer-motion"
+import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion"
 import { submitToGoogleSheets } from "@/lib/googleSheets"
 import { useCart } from "@/contexts/CartContext"
+import { CartDrawer } from "@/components/CartDrawer"
 
 
 const categories = [
@@ -86,6 +87,20 @@ export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [newsletterEmail, setNewsletterEmail] = useState("")
   const [isSubmittingNewsletter, setIsSubmittingNewsletter] = useState(false)
+  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 })
+  const [isHovering, setIsHovering] = useState(false)
+  const [heroImageBlur, setHeroImageBlur] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+
+  // Custom cursor tracking
+  useEffect(() => {
+    const updateCursor = (e: MouseEvent) => {
+      setCursorPosition({ x: e.clientX, y: e.clientY })
+    }
+    
+    window.addEventListener('mousemove', updateCursor)
+    return () => window.removeEventListener('mousemove', updateCursor)
+  }, [])
 
   // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
@@ -111,9 +126,35 @@ export default function HomePage() {
     try {
       await submitToGoogleSheets({
         email: newsletterEmail,
-        formType: 'newsletter'
+        formType: 'newsletter',
+        timestamp: new Date().toISOString(),
+        referralSource: 'Website'
       })
-      alert("Successfully subscribed! Data saved to Google Sheets.")
+      
+      // Show success toast with F1 theme
+      const toast = document.createElement('div')
+      toast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-600 to-green-800 text-white px-6 py-4 rounded-xl shadow-lg z-[10000] font-bold tracking-wider'
+      toast.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <div class="w-6 h-6 bg-green-400 rounded-full animate-pulse"></div>
+          <span>🏁 WELCOME TO THE PIT CREW!</span>
+        </div>
+      `
+      document.body.appendChild(toast)
+      
+      // Animate in
+      toast.style.transform = 'translateX(100%)'
+      setTimeout(() => {
+        toast.style.transform = 'translateX(0)'
+        toast.style.transition = 'transform 0.5s ease-out'
+      }, 100)
+      
+      // Remove after 4 seconds
+      setTimeout(() => {
+        toast.style.transform = 'translateX(100%)'
+        setTimeout(() => document.body.removeChild(toast), 500)
+      }, 4000)
+      
       setNewsletterEmail("")
     } catch (error) {
       alert("Subscription failed. Please try again.")
@@ -123,7 +164,24 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden relative">
+    <div className="min-h-screen bg-black text-white overflow-x-hidden relative cursor-none">
+      {/* Custom F1 Cursor */}
+      <motion.div
+        className="fixed top-0 left-0 w-8 h-8 pointer-events-none z-[9999] mix-blend-difference"
+        style={{
+          x: cursorPosition.x - 16,
+          y: cursorPosition.y - 16,
+        }}
+        animate={{
+          scale: isHovering ? 1.5 : 1,
+          rotate: isHovering ? 180 : 0,
+        }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      >
+        <div className="w-full h-full bg-red-500 rounded-full flex items-center justify-center">
+          <div className="w-4 h-4 border-2 border-white rounded-full" />
+        </div>
+      </motion.div>
    
       {/* Animated Background Particles */}
       <div className="fixed inset-0 z-0">
@@ -200,15 +258,20 @@ export default function HomePage() {
                 <Heart className="w-5 h-5" />
                 <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
               </Button>
-              <Link href="/cart">
-                <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative group">
-                  <ShoppingCart className="w-5 h-5" />
-                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gradient-to-r from-red-500 to-red-700 text-xs animate-pulse flex items-center justify-center">
-                    {cartState.itemCount}
-                  </Badge>
-                  <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover:bg-red-600/20 relative group"
+                onClick={() => setIsCartOpen(true)}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gradient-to-r from-red-500 to-red-700 text-xs animate-pulse flex items-center justify-center">
+                  {cartState.itemCount}
+                </Badge>
+                <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
+              </Button>
               <Link href="/login">
                 <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative group">
                   <User className="w-5 h-5" />
@@ -226,14 +289,52 @@ export default function HomePage() {
         ref={heroRef}
         style={{ y: heroY, opacity: heroOpacity }}
         className="relative h-screen flex items-center justify-center overflow-hidden"
+        onMouseEnter={() => setHeroImageBlur(true)}
+        onMouseLeave={() => setHeroImageBlur(false)}
       >
-        {/* F1 Racing Background Image */}
+        {/* F1 Racing Background Image with Motion Blur */}
         <div className="absolute inset-0 z-0">
-          <img
+          <motion.img
             src="https://images.unsplash.com/photo-1652090379496-4219a00c8ebf?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHNlYXJjaHwxfHxGMSUyMHJhY2luZ3xlbnwwfHx8fDE3NTMyMDY1ODl8MA&ixlib=rb-4.1.0&q=85"
             alt="F1 Racing Background"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-all duration-700"
+            style={{
+              filter: heroImageBlur ? 'blur(2px) brightness(1.2)' : 'blur(0px) brightness(1)',
+              transform: heroImageBlur ? 'scale(1.05)' : 'scale(1)',
+            }}
           />
+          
+          {/* Speed Lines Effect */}
+          <AnimatePresence>
+            {heroImageBlur && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-5"
+              >
+                {[...Array(15)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent"
+                    style={{
+                      top: `${10 + i * 6}%`,
+                      width: `${60 + Math.random() * 40}%`,
+                      left: `${Math.random() * 40}%`,
+                    }}
+                    initial={{ x: -200, opacity: 0 }}
+                    animate={{ x: 200, opacity: [0, 1, 0] }}
+                    transition={{
+                      duration: 0.8,
+                      delay: i * 0.05,
+                      repeat: Infinity,
+                      repeatDelay: 1,
+                    }}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Animated Overlays */}
@@ -407,6 +508,8 @@ export default function HomePage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
           >
             <Link href="/products">
               <Button
@@ -415,7 +518,33 @@ export default function HomePage() {
               >
                 <ShoppingCart className="w-6 h-6 mr-3" />
                 VIEW ALL PRODUCTS
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                
+                {/* Racing Line Animation */}
+                <motion.div 
+                  className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ 
+                    x: ['100%', '200%'],
+                    transition: { 
+                      duration: 0.6,
+                      ease: "easeOut"
+                    }
+                  }}
+                />
+                
+                {/* Engine Rev Effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-red-500/20 to-orange-600/20"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileHover={{ 
+                    opacity: [0, 0.5, 0],
+                    scale: [0.8, 1.1, 1.2],
+                    transition: { 
+                      duration: 0.8,
+                      ease: "easeOut"
+                    }
+                  }}
+                />
               </Button>
             </Link>
           </motion.div>
@@ -535,6 +664,8 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -20, rotateX: 10 }}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
                 className="group relative bg-gradient-to-br from-gray-900 to-black rounded-3xl overflow-hidden border border-gray-800 hover:border-red-500/50 transition-all duration-500"
                 style={{ transformStyle: "preserve-3d" }}
               >
@@ -546,6 +677,64 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
+
+                  {/* Tire Skid Lines Effect */}
+                  <motion.div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    initial={false}
+                  >
+                    {[...Array(8)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute h-0.5 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                        style={{
+                          top: `${20 + i * 8}%`,
+                          width: '60%',
+                          right: '10%',
+                          transform: `rotate(${-15 + Math.random() * 10}deg)`,
+                        }}
+                        initial={{ scaleX: 0, opacity: 0 }}
+                        whileInView={{ 
+                          scaleX: 1, 
+                          opacity: [0, 1, 0.5],
+                          transition: { 
+                            duration: 0.8,
+                            delay: i * 0.1,
+                          }
+                        }}
+                        viewport={{ once: false }}
+                      />
+                    ))}
+                  </motion.div>
+
+                  {/* Exhaust Smoke Effect */}
+                  <motion.div
+                    className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100"
+                    initial={false}
+                  >
+                    {[...Array(5)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-3 h-3 bg-gray-400/20 rounded-full blur-sm"
+                        style={{
+                          left: i * 8,
+                          bottom: i * 4,
+                        }}
+                        animate={{
+                          y: [0, -30, -60],
+                          x: [0, Math.random() * 20 - 10],
+                          opacity: [0, 0.6, 0],
+                          scale: [0.5, 1.2, 0.8],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: i * 0.3,
+                          ease: "easeOut",
+                        }}
+                      />
+                    ))}
+                  </motion.div>
 
                   {/* Rarity Glow */}
                   <div
@@ -597,9 +786,29 @@ export default function HomePage() {
                   </h3>
                   <p className="text-3xl font-black text-red-500 mb-6">${product.price}</p>
 
-                  <Button className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-3 tracking-wider border-0 relative group overflow-hidden">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-bold py-3 tracking-wider border-0 relative group overflow-hidden"
+                    onMouseEnter={() => setIsHovering(true)}
+                    onMouseLeave={() => setIsHovering(false)}
+                  >
                     <ShoppingCart className="w-5 h-5 mr-2" />
                     ACQUIRE NOW
+                    
+                    {/* Engine Ignition Pulse */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-yellow-400/30 via-red-500/30 to-orange-600/30"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileHover={{
+                        opacity: [0, 0.7, 0],
+                        scale: [0.8, 1.2, 1],
+                        transition: {
+                          duration: 1.2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }
+                      }}
+                    />
+                    
                     <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                   </Button>
                 </div>
@@ -708,6 +917,9 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </div>
   )
 }

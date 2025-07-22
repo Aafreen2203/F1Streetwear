@@ -5,6 +5,7 @@ interface FormData {
   email: string;
   phone?: string;
   timestamp?: string;
+  referralSource?: string;
   formType: "signup" | "newsletter" | "contact" | "forgot-password";
 }
 

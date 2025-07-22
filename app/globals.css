@@ -466,3 +466,117 @@ html {
     text-shadow: 0 0 3px rgba(220, 38, 38, 0.5), 0 0 6px rgba(220, 38, 38, 0.3);
   }
 }
+
+/* F1-Themed Custom Styles */
+.f1-cursor {
+  cursor: none;
+}
+
+.f1-button-hover {
+  background: linear-gradient(45deg, #dc2626, #991b1b);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+  transform: translateY(-2px);
+}
+
+.f1-text-glow {
+  text-shadow: 0 0 10px rgba(220, 38, 38, 0.5), 0 0 20px rgba(220, 38, 38, 0.3);
+}
+
+.f1-speed-lines {
+  background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.6), transparent);
+  animation: speedLine 0.8s ease-out;
+}
+
+@keyframes speedLine {
+  0% { transform: translateX(-100px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateX(100px); opacity: 0; }
+}
+
+.f1-pulse {
+  animation: f1Pulse 2s ease-in-out infinite;
+}
+
+@keyframes f1Pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.f1-dashboard-light {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  box-shadow: 0 0 15px rgba(220, 38, 38, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.f1-smoke {
+  animation: f1Smoke 3s ease-out infinite;
+}
+
+@keyframes f1Smoke {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  30% { opacity: 0.8; }
+  100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+}
+
+/* Custom scrollbar for F1 theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #dc2626, #991b1b);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+}
+
+/* F1 Loading Animation */
+.f1-loading {
+  border: 3px solid #374151;
+  border-top: 3px solid #dc2626;
+  border-radius: 50%;
+  animation: f1Spin 1s linear infinite;
+}
+
+@keyframes f1Spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* F1 Telemetry Data Animation */
+.f1-telemetry {
+  position: relative;
+  overflow: hidden;
+}
+
+.f1-telemetry::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #dc2626, transparent);
+  animation: f1Scan 2s ease-in-out infinite;
+}
+
+@keyframes f1Scan {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* F1 Success Flash */
+.f1-success-flash {
+  animation: f1SuccessFlash 0.5s ease-out;
+}
+
+@keyframes f1SuccessFlash {
+  0% { background-color: rgba(34, 197, 94, 0); }
+  50% { background-color: rgba(34, 197, 94, 0.2); }
+  100% { background-color: rgba(34, 197, 94, 0); }
+}
