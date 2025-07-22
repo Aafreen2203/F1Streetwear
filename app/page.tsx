@@ -304,7 +304,7 @@ export default function HomePage() {
             }}
           />
           
-          {/* Speed Lines Effect */}
+          {/* Energy Grid Effect */}
           <AnimatePresence>
             {heroImageBlur && (
               <motion.div
@@ -313,22 +313,90 @@ export default function HomePage() {
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 z-5"
               >
-                {[...Array(15)].map((_, i) => (
+                {/* Grid Lines */}
+                <div className="absolute inset-0">
+                  {/* Vertical Lines */}
+                  {[...Array(8)].map((_, i) => (
+                    <motion.div
+                      key={`v-${i}`}
+                      className="absolute top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-red-400/60 to-transparent"
+                      style={{ left: `${10 + i * 12}%` }}
+                      initial={{ scaleY: 0 }}
+                      animate={{ scaleY: 1 }}
+                      transition={{
+                        duration: 0.6,
+                        delay: i * 0.1,
+                        ease: "easeOut"
+                      }}
+                    />
+                  ))}
+                  
+                  {/* Horizontal Lines */}
+                  {[...Array(6)].map((_, i) => (
+                    <motion.div
+                      key={`h-${i}`}
+                      className="absolute left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-red-400/60 to-transparent"
+                      style={{ top: `${15 + i * 15}%` }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 0.3 + i * 0.1,
+                        ease: "easeOut"
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Energy Pulses */}
+                {[...Array(12)].map((_, i) => (
                   <motion.div
-                    key={i}
-                    className="absolute h-0.5 bg-gradient-to-r from-transparent via-red-400 to-transparent"
+                    key={`pulse-${i}`}
+                    className="absolute w-3 h-3 bg-red-400 rounded-full shadow-lg"
                     style={{
-                      top: `${10 + i * 6}%`,
-                      width: `${60 + Math.random() * 40}%`,
-                      left: `${Math.random() * 40}%`,
+                      left: `${10 + (i % 4) * 25}%`,
+                      top: `${20 + Math.floor(i / 4) * 20}%`,
+                      boxShadow: '0 0 20px rgba(239, 68, 68, 0.8)',
                     }}
-                    initial={{ x: -200, opacity: 0 }}
-                    animate={{ x: 200, opacity: [0, 1, 0] }}
+                    animate={{
+                      scale: [0.5, 1.5, 0.5],
+                      opacity: [0.3, 1, 0.3],
+                      boxShadow: [
+                        '0 0 10px rgba(239, 68, 68, 0.4)',
+                        '0 0 30px rgba(239, 68, 68, 1)',
+                        '0 0 10px rgba(239, 68, 68, 0.4)'
+                      ],
+                    }}
                     transition={{
-                      duration: 0.8,
-                      delay: i * 0.05,
+                      duration: 2,
+                      delay: i * 0.2,
                       repeat: Infinity,
-                      repeatDelay: 1,
+                      ease: "easeInOut"
+                    }}
+                  />
+                ))}
+
+                {/* Circuit Connections */}
+                {[...Array(8)].map((_, i) => (
+                  <motion.div
+                    key={`circuit-${i}`}
+                    className="absolute h-0.5 bg-gradient-to-r from-yellow-400 via-red-500 to-orange-400"
+                    style={{
+                      left: `${15 + (i % 3) * 30}%`,
+                      top: `${25 + Math.floor(i / 3) * 25}%`,
+                      width: '20%',
+                      transform: `rotate(${Math.random() * 60 - 30}deg)`,
+                    }}
+                    initial={{ opacity: 0, scaleX: 0 }}
+                    animate={{ 
+                      opacity: [0, 1, 0.5, 1, 0],
+                      scaleX: [0, 1, 1, 1, 0]
+                    }}
+                    transition={{
+                      duration: 3,
+                      delay: i * 0.4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
                     }}
                   />
                 ))}
