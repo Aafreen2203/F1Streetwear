@@ -186,40 +186,73 @@ export default function HomePage() {
         style={{ y: heroY, opacity: heroOpacity }}
         className="relative h-screen flex items-center justify-center overflow-hidden"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/40 to-black/20 z-10" />
-        <div className="absolute inset-0 bg-black/20 z-10" />
-        <Image
-          src="/Background.jpg"
-          alt="F1 Racing Background"
-          fill
-          className="object-cover z-0"
-          priority
-        />
-        {/* 3D Background Effect */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10" />
-          <Image
-            src="/placeholder.svg?height=1080&width=1920"
-            alt="F1 Racing Circuit"
-            fill
-            className="object-cover scale-110"
-            priority
+        {/* F1 Racing Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1652090379496-4219a00c8ebf?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHNlYXJjaHwxfHxGMSUyMHJhY2luZ3xlbnwwfHx8fDE3NTMyMDY1ODl8MA&ixlib=rb-4.1.0&q=85"
+            alt="F1 Racing Background"
+            className="w-full h-full object-cover"
           />
+        </div>
 
-          {/* Animated Grid Overlay */}
-          <div className="absolute inset-0 opacity-20">
-            <div
-              className="w-full h-full"
-              style={{
-                backgroundImage: `
+        {/* Animated Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/60 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 z-10" />
+
+        {/* Animated Grid Overlay */}
+        <div className="absolute inset-0 opacity-20 z-10">
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage: `
                 linear-gradient(rgba(239, 68, 68, 0.1) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(239, 68, 68, 0.1) 1px, transparent 1px)
               `,
-                backgroundSize: "50px 50px",
+              backgroundSize: "50px 50px",
+            }}
+          />
+        </div>
+
+        {/* Floating Smoke Particles */}
+        <div className="absolute inset-0 z-14 pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={`smoke-${i}`}
+              className="absolute w-2 h-2 bg-gray-300/20 rounded-full blur-sm"
+              style={{
+                right: `${Math.random() * 100}%`,
+                top: `${50 + Math.random() * 40}%`,
+              }}
+              animate={{
+                y: [0, -100, -200, -300],
+                x: [0, Math.random() * 100 - 50, Math.random() * 150 - 75],
+                opacity: [0, 0.8, 0.5, 0],
+                scale: [0.5, 1, 1.5, 0],
+              }}
+              transition={{
+                duration: Math.random() * 10 + 8,
+                repeat: Number.POSITIVE_INFINITY,
+                delay: Math.random() * 8,
+                ease: "easeOut",
               }}
             />
-          </div>
+          ))}
+        </div>
+
+        {/* Heat Distortion Effect */}
+        <div className="absolute inset-0 z-11 pointer-events-none">
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-red-500/10 via-orange-400/5 to-transparent"
+            animate={{
+              opacity: [0.3, 0.8, 0.5, 0.7],
+              scaleY: [1, 1.1, 0.9, 1],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "easeInOut",
+            }}
+          />
         </div>
 
         <div className="relative z-20 text-center max-w-6xl mx-auto px-4">
@@ -237,7 +270,7 @@ export default function HomePage() {
             >
               <Badge className="bg-gradient-to-r from-red-600 to-red-800 text-white px-6 py-2 text-sm font-bold tracking-wider border-0 relative">
                 <Zap className="w-4 h-4 mr-2" />
-                SEASON 2024 • LIVE NOW
+                SEASON 2025 • LIVE NOW
                 <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 blur-lg opacity-50 animate-pulse" />
               </Badge>
             </motion.div>
