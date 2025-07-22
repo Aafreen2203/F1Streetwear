@@ -9,6 +9,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { useParams } from "next/navigation"
+import { useCart } from "@/contexts/CartContext"
 
 const categoryProducts = {
   "racing-tees": [
@@ -16,7 +17,7 @@ const categoryProducts = {
       id: 1,
       name: "Monaco GP Tee",
       price: 89,
-      image: "/placeholder.svg?height=400&width=300",
+      image: "/MonacoGPTee.jpg",
       badge: "New",
       rating: 4.8,
       sizes: ["S", "M", "L", "XL"],
@@ -25,7 +26,7 @@ const categoryProducts = {
       id: 4,
       name: "Pit Crew Hoodie",
       price: 149,
-      image: "/placeholder.svg?height=400&width=300",
+      image: "/PitCrewHoodie.jpg",
       badge: "",
       rating: 4.6,
       sizes: ["M", "L", "XL", "XXL"],
@@ -70,6 +71,7 @@ const categoryProducts = {
 }
 
 export default function CategoryPage() {
+  const { addToCart, state: cartState } = useCart()
   const params = useParams()
   const slug = params.slug as string
   const [searchQuery, setSearchQuery] = useState("")
@@ -102,6 +104,18 @@ export default function CategoryPage() {
     setFilteredProducts(filtered)
   }, [searchQuery, sortBy, slug])
 
+  const handleAddToCart = (product: typeof categoryProducts['racing-tees'][0], e: React.MouseEvent) => {
+    e.preventDefault() // Prevent navigation when clicking the button
+    e.stopPropagation()
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: categoryName,
+    })
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
@@ -124,7 +138,7 @@ export default function CategoryPage() {
               <Link href="/cart">
                 <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative">
                   <ShoppingCart className="w-5 h-5" />
-                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-600 text-xs">3</Badge>
+                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-600 text-xs">{cartState.itemCount}</Badge>
                 </Button>
               </Link>
               <Link href="/login">
@@ -315,7 +329,12 @@ export default function CategoryPage() {
                           {product.name}
                         </h3>
                         <p className="text-2xl font-bold text-red-500 mb-4">${product.price}</p>
-                        <Button className="w-full bg-red-600 hover:bg-red-700 text-white">Add to Cart</Button>
+                        <Button 
+                          onClick={(e) => handleAddToCart(product, e)}
+                          className="w-full bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          Add to Cart
+                        </Button>
                       </div>
                     </Link>
                   </motion.div>

@@ -8,6 +8,7 @@ import { ShoppingCart, User, Search, Heart, Grid, List, Flag } from "lucide-reac
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { useCart } from "@/contexts/CartContext"
 
 const products = [
   {
@@ -15,7 +16,7 @@ const products = [
     name: "Monaco GP Tee",
     price: 89,
     category: "Racing Tees",
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/MonacoGPTee.jpg",
     badge: "New",
     rating: 4.8,
   },
@@ -24,7 +25,7 @@ const products = [
     name: "Silverstone Jacket",
     price: 299,
     category: "Speed Jackets",
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/SilverstoneJacket.jpg",
     badge: "Hot",
     rating: 4.9,
   },
@@ -33,7 +34,7 @@ const products = [
     name: "Championship Cap",
     price: 59,
     category: "Victory Caps",
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/ChamCap.jpg",
     badge: "Limited",
     rating: 4.7,
   },
@@ -42,7 +43,7 @@ const products = [
     name: "Pit Crew Hoodie",
     price: 149,
     category: "Racing Tees",
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/PitCrewHoodie.jpg",
     badge: "",
     rating: 4.6,
   },
@@ -51,7 +52,7 @@ const products = [
     name: "Track Day Shorts",
     price: 79,
     category: "Track Accessories",
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/TrackDayShorts.jpg",
     badge: "New",
     rating: 4.5,
   },
@@ -60,7 +61,7 @@ const products = [
     name: "Victory Polo",
     price: 119,
     category: "Racing Tees",
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/VictoryPolo.jpg",
     badge: "",
     rating: 4.8,
   },
@@ -69,7 +70,7 @@ const products = [
     name: "Speed Demon Tee",
     price: 69,
     category: "Racing Tees",
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/SpeedDemonTee.jpg",
     badge: "Hot",
     rating: 4.7,
   },
@@ -78,13 +79,14 @@ const products = [
     name: "Racing Gloves",
     price: 89,
     category: "Track Accessories",
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/RacingGloves.jpg",
     badge: "Limited",
     rating: 4.9,
   },
 ]
 
 export default function ProductsPage() {
+  const { addToCart, state: cartState } = useCart()
   const [searchQuery, setSearchQuery] = useState("")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("name")
@@ -114,6 +116,18 @@ export default function ProductsPage() {
     setFilteredProducts(filtered)
   }, [searchQuery, sortBy])
 
+  const handleAddToCart = (product: typeof products[0], e: React.MouseEvent) => {
+    e.preventDefault() // Prevent navigation when clicking the button
+    e.stopPropagation()
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      category: product.category,
+    })
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
@@ -136,7 +150,7 @@ export default function ProductsPage() {
               <Link href="/cart">
                 <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative">
                   <ShoppingCart className="w-5 h-5" />
-                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-600 text-xs">3</Badge>
+                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-600 text-xs">{cartState.itemCount}</Badge>
                 </Button>
               </Link>
               <Link href="/login">
@@ -288,7 +302,12 @@ export default function ProductsPage() {
                           {product.name}
                         </h3>
                         <p className="text-2xl font-bold text-red-500 mb-4">${product.price}</p>
-                        <Button className="w-full bg-red-600 hover:bg-red-700 text-white">Add to Cart</Button>
+                        <Button 
+                          onClick={(e) => handleAddToCart(product, e)}
+                          className="w-full bg-red-600 hover:bg-red-700 text-white"
+                        >
+                          Add to Cart
+                        </Button>
                       </div>
                     </Link>
                   </motion.div>

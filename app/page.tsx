@@ -8,6 +8,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 import { submitToGoogleSheets } from "@/lib/googleSheets"
+import { useCart } from "@/contexts/CartContext"
 
 
 const categories = [
@@ -81,9 +82,21 @@ const featuredProducts = [
 ]
 
 export default function HomePage() {
+  const { state: cartState } = useCart()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [newsletterEmail, setNewsletterEmail] = useState("")
   const [isSubmittingNewsletter, setIsSubmittingNewsletter] = useState(false)
+
+  // Smooth scroll function
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }
   const { scrollY } = useScroll()
   const heroY = useTransform(scrollY, [0, 500], [0, -150])
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0])
@@ -161,15 +174,20 @@ export default function HomePage() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
-              {["PRODUCTS", "CATEGORIES", "DROPS", "COMMUNITY"].map((item) => (
-                <Link
-                  key={item}
-                  href={`/${item.toLowerCase()}`}
-                  className="relative group text-sm font-bold tracking-wider hover:text-red-400 transition-colors"
+              {[
+                { name: "PRODUCTS", id: "products" },
+                { name: "CATEGORIES", id: "categories" },
+                { name: "DROPS", id: "drops" },
+                { name: "COMMUNITY", id: "community" }
+              ].map((item) => (
+                <button
+                  key={item.name}
+                  onClick={() => scrollToSection(item.id)}
+                  className="relative group text-sm font-bold tracking-wider hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer"
                 >
-                  {item}
+                  {item.name}
                   <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-red-500 to-red-700 group-hover:w-full transition-all duration-300" />
-                </Link>
+                </button>
               ))}
             </div>
 
@@ -186,7 +204,7 @@ export default function HomePage() {
                 <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative group">
                   <ShoppingCart className="w-5 h-5" />
                   <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gradient-to-r from-red-500 to-red-700 text-xs animate-pulse">
-                    3
+                    {cartState.itemCount}
                   </Badge>
                   <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
                 </Button>
@@ -204,6 +222,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <motion.section
+        id="hero"
         ref={heroRef}
         style={{ y: heroY, opacity: heroOpacity }}
         className="relative h-screen flex items-center justify-center overflow-hidden"
@@ -376,6 +395,7 @@ export default function HomePage() {
 
       {/* View All Products Section */}
       <motion.section 
+        id="products"
         className="py-16 relative"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -403,7 +423,7 @@ export default function HomePage() {
       </motion.section>
 
       {/* Categories Section */}
-      <section className="py-32 relative">
+      <section id="categories" className="py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-black via-gray-900/50 to-black" />
 
         <div className="container mx-auto px-4 relative z-10">
@@ -484,7 +504,7 @@ export default function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-32 relative">
+      <section id="drops" className="py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-red-900/10 via-black to-red-900/10" />
 
         <div className="container mx-auto px-4 relative z-10">
@@ -590,7 +610,7 @@ export default function HomePage() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-32 relative">
+      <section id="community" className="py-32 relative">
         <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 via-black to-red-900/20" />
 
         <div className="container mx-auto px-4 text-center relative z-10">
