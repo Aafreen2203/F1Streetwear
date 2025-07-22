@@ -335,7 +335,7 @@ export default function SignUpPage() {
           className="hidden lg:block relative bg-gradient-to-br from-red-900/20 to-black"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
-          <Image src="/placeholder.svg?height=1080&width=800" alt="F1 Racing Victory" fill className="object-cover" />
+          <Image src="/Signup.jpg" alt="F1 Racing Victory" fill className="object-cover" />
 
           <div className="absolute bottom-12 left-12 right-12 z-20">
             <motion.div

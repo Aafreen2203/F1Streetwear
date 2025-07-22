@@ -398,7 +398,12 @@ export default function ForgotPasswordPage() {
           className="hidden lg:block relative bg-gradient-to-br from-red-900/20 to-black"
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
-          <Image src="/placeholder.svg?height=1080&width=800" alt="F1 Racing Speed" fill className="object-cover" />
+          <Image 
+            src="https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODF8MHwxfHNlYXJjaHwxfHxGMSUyMGZvcm11bGElMjBvbmUlMjBzcGVlZHxlbnwwfHx8fDE3NTMyMDY1ODl8MA&ixlib=rb-4.1.0&q=85" 
+            alt="F1 Racing Speed" 
+            fill 
+            className="object-cover" 
+          />
 
           <div className="absolute bottom-12 left-12 right-12 z-20">
             <motion.div

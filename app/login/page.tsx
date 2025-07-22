@@ -195,7 +195,7 @@ export default function LoginPage() {
         >
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10" />
           <Image
-            src="/placeholder.svg?height=1080&width=800"
+            src="/Login.jpg"
             alt="F1 Racing Experience"
             fill
             className="object-cover"
