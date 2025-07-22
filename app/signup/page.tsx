@@ -11,6 +11,7 @@ import { Eye, EyeOff, ArrowLeft, Flag, Mail, Lock, User } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { submitToGoogleSheets } from "@/lib/googleSheets"
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -46,11 +47,26 @@ export default function SignUpPage() {
     }
 
     setIsLoading(true)
-    // Simulate signup process
-    setTimeout(() => {
+    
+    try {
+      // Submit to Google Sheets
+      await submitToGoogleSheets({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        formType: 'signup'
+      })
+      
+      // Simulate signup process
+      setTimeout(() => {
+        setIsLoading(false)
+        alert("Account created successfully! Data saved to Google Sheets.")
+        // In production, redirect to dashboard or login
+      }, 2000)
+    } catch (error) {
       setIsLoading(false)
-      // Redirect to dashboard or login
-    }, 2000)
+      alert("Signup failed. Please try again.")
+    }
   }
 
   return (

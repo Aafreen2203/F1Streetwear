@@ -7,6 +7,7 @@ import { ShoppingCart, User, Search, Heart, Zap, Trophy, Flag, Play } from "luci
 import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
+import { submitToGoogleSheets } from "@/lib/googleSheets"
 
 
 const categories = [
@@ -81,11 +82,32 @@ const featuredProducts = [
 
 export default function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [newsletterEmail, setNewsletterEmail] = useState("")
+  const [isSubmittingNewsletter, setIsSubmittingNewsletter] = useState(false)
   const { scrollY } = useScroll()
   const heroY = useTransform(scrollY, [0, 500], [0, -150])
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0])
   const heroRef = useRef(null)
   const isHeroInView = useInView(heroRef)
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newsletterEmail) return
+
+    setIsSubmittingNewsletter(true)
+    try {
+      await submitToGoogleSheets({
+        email: newsletterEmail,
+        formType: 'newsletter'
+      })
+      alert("Successfully subscribed! Data saved to Google Sheets.")
+      setNewsletterEmail("")
+    } catch (error) {
+      alert("Subscription failed. Please try again.")
+    } finally {
+      setIsSubmittingNewsletter(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden relative">
@@ -270,7 +292,7 @@ export default function HomePage() {
             >
               <Badge className="bg-gradient-to-r from-red-600 to-red-800 text-white px-6 py-2 text-sm font-bold tracking-wider border-0 relative">
                 <Zap className="w-4 h-4 mr-2" />
-                SEASON 2025 • LIVE NOW
+                SEASON 2024 • LIVE NOW
                 <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 blur-lg opacity-50 animate-pulse" />
               </Badge>
             </motion.div>
@@ -350,6 +372,34 @@ export default function HomePage() {
             />
           </motion.div>
         </motion.div>
+      </motion.section>
+
+      {/* View All Products Section */}
+      <motion.section 
+        className="py-16 relative"
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <Link href="/products">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-16 py-6 text-xl font-bold tracking-wider border-0 relative group overflow-hidden"
+              >
+                <ShoppingCart className="w-6 h-6 mr-3" />
+                VIEW ALL PRODUCTS
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
       </motion.section>
 
       {/* Categories Section */}
@@ -561,16 +611,23 @@ export default function HomePage() {
               GET EXCLUSIVE ACCESS TO LIMITED DROPS, RACING INSIGHTS, AND VIP CHAMPIONSHIP DEALS
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
+            <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
               <input
                 type="email"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
                 placeholder="ENTER YOUR EMAIL"
                 className="flex-1 px-6 py-4 bg-gray-900/80 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-red-500 font-mono tracking-wider backdrop-blur-sm"
+                required
               />
-              <Button className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-8 py-4 font-bold tracking-wider border-0 rounded-xl">
-                ACTIVATE
+              <Button 
+                type="submit"
+                disabled={isSubmittingNewsletter}
+                className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-8 py-4 font-bold tracking-wider border-0 rounded-xl disabled:opacity-50"
+              >
+                {isSubmittingNewsletter ? "JOINING..." : "ACTIVATE"}
               </Button>
-            </div>
+            </form>
           </motion.div>
         </div>
       </section>
