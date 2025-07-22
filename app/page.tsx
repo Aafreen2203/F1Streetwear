@@ -7,9 +7,10 @@ import { ShoppingCart, User, Search, Heart, Zap, Trophy, Flag, Play } from "luci
 import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion"
-import { submitToGoogleSheets } from "@/lib/googleSheets"
+import { submitToGoogleSheets, isUserAuthenticated, getCurrentUser, logoutUser } from "@/lib/googleSheets"
 import { useCart } from "@/contexts/CartContext"
 import { CartDrawer } from "@/components/CartDrawer"
+import { useRouter } from "next/navigation"
 
 
 const categories = [
@@ -83,6 +84,7 @@ const featuredProducts = [
 ]
 
 export default function HomePage() {
+  const router = useRouter()
   const { state: cartState } = useCart()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [newsletterEmail, setNewsletterEmail] = useState("")
@@ -91,6 +93,14 @@ export default function HomePage() {
   const [isHovering, setIsHovering] = useState(false)
   const [heroImageBlur, setHeroImageBlur] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [currentUser, setCurrentUser] = useState<string | null>(null)
+
+  // Check authentication status on component mount
+  useEffect(() => {
+    setIsAuthenticated(isUserAuthenticated())
+    setCurrentUser(getCurrentUser())
+  }, [])
 
   // Custom cursor tracking
   useEffect(() => {
@@ -117,6 +127,36 @@ export default function HomePage() {
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0])
   const heroRef = useRef(null)
   const isHeroInView = useInView(heroRef)
+
+  const handleLogout = () => {
+    logoutUser()
+    setIsAuthenticated(false)
+    setCurrentUser(null)
+    
+    // Show logout toast
+    const toast = document.createElement('div')
+    toast.className = 'fixed top-4 right-4 bg-gradient-to-r from-gray-600 to-gray-800 text-white px-6 py-4 rounded-xl shadow-lg z-[10000] font-bold tracking-wider'
+    toast.innerHTML = `
+      <div class="flex items-center space-x-3">
+        <div class="w-6 h-6 bg-gray-400 rounded-full animate-pulse"></div>
+        <span>🏁 LOGGED OUT SUCCESSFULLY</span>
+      </div>
+    `
+    document.body.appendChild(toast)
+    
+    // Animate in
+    toast.style.transform = 'translateX(100%)'
+    setTimeout(() => {
+      toast.style.transform = 'translateX(0)'
+      toast.style.transition = 'transform 0.5s ease-out'
+    }, 100)
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.style.transform = 'translateX(100%)'
+      setTimeout(() => document.body.removeChild(toast), 500)
+    }, 3000)
+  }
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -272,12 +312,31 @@ export default function HomePage() {
                 </Badge>
                 <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
               </Button>
-              <Link href="/login">
-                <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative group">
-                  <User className="w-5 h-5" />
-                  <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
-                </Button>
-              </Link>
+              
+              {/* User Authentication */}
+              {isAuthenticated ? (
+                <div className="relative group">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="hover:bg-red-600/20 relative group"
+                    onClick={handleLogout}
+                    title={`Logged in as ${currentUser}`}
+                  >
+                    <User className="w-5 h-5 text-green-400" />
+                    <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
+                  </Button>
+                  {/* User indicator */}
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                </div>
+              ) : (
+                <Link href="/login">
+                  <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative group">
+                    <User className="w-5 h-5" />
+                    <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

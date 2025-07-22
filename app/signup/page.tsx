@@ -12,8 +12,10 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { submitToGoogleSheets } from "@/lib/googleSheets"
+import { useRouter } from "next/navigation"
 
 export default function SignUpPage() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -49,20 +51,43 @@ export default function SignUpPage() {
     setIsLoading(true)
     
     try {
-      // Submit to Google Sheets
+      // Submit to Google Sheets with password (in production, hash the password)
       await submitToGoogleSheets({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        formType: 'signup'
+        password: formData.password, // In production, hash this before storing
+        formType: 'signup',
+        timestamp: new Date().toISOString(),
+        referralSource: 'Website'
       })
       
-      // Simulate signup process
+      // Show success toast
+      const toast = document.createElement('div')
+      toast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-600 to-green-800 text-white px-6 py-4 rounded-xl shadow-lg z-[10000] font-bold tracking-wider'
+      toast.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <div class="w-6 h-6 bg-green-400 rounded-full animate-pulse"></div>
+          <span>🏁 ACCOUNT CREATED SUCCESSFULLY!</span>
+        </div>
+      `
+      document.body.appendChild(toast)
+      
+      // Animate in
+      toast.style.transform = 'translateX(100%)'
       setTimeout(() => {
-        setIsLoading(false)
-        alert("Account created successfully! Data saved to Google Sheets.")
-        // In production, redirect to dashboard or login
+        toast.style.transform = 'translateX(0)'
+        toast.style.transition = 'transform 0.5s ease-out'
+      }, 100)
+      
+      setIsLoading(false)
+      
+      // Navigate to login page after 2 seconds
+      setTimeout(() => {
+        document.body.removeChild(toast)
+        router.push('/login?message=Account created successfully. Please sign in.')
       }, 2000)
+      
     } catch (error) {
       setIsLoading(false)
       alert("Signup failed. Please try again.")

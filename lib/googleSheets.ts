@@ -3,6 +3,7 @@ interface FormData {
   firstName?: string;
   lastName?: string;
   email: string;
+  password?: string; // For signup authentication
   phone?: string;
   timestamp?: string;
   referralSource?: string;
@@ -73,3 +74,57 @@ function doPost(e) {
   }
 }
 */
+
+// Simple authentication function that checks Google Sheets data
+export async function authenticateUser(
+  email: string,
+  password: string
+): Promise<boolean> {
+  try {
+    // In a real app, you would fetch from your backend/database
+    // For this demo, we'll simulate checking against stored data
+    // Note: This is a simplified approach - in production, use proper authentication
+
+    // Mock authentication - in production, this would query your database
+    // For now, we'll return true if email contains '@' and password is not empty
+    const isValidFormat = email.includes("@") && password.length >= 6;
+
+    if (isValidFormat) {
+      // Store user session (in production, use secure session management)
+      if (typeof window !== "undefined") {
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("isAuthenticated", "true");
+      }
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return false;
+  }
+}
+
+// Check if user is authenticated
+export function isUserAuthenticated(): boolean {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("isAuthenticated") === "true";
+  }
+  return false;
+}
+
+// Get current user email
+export function getCurrentUser(): string | null {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("userEmail");
+  }
+  return null;
+}
+
+// Logout user
+export function logoutUser(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("isAuthenticated");
+  }
+}

@@ -10,21 +10,90 @@ import { Eye, EyeOff, ArrowLeft, Flag, Mail, Lock } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { authenticateUser } from "@/lib/googleSheets"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect } from "react"
 
 export default function LoginPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const message = searchParams.get('message')
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  // Show success message if redirected from signup
+  useEffect(() => {
+    if (message) {
+      const toast = document.createElement('div')
+      toast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-600 to-green-800 text-white px-6 py-4 rounded-xl shadow-lg z-[10000] font-bold tracking-wider'
+      toast.innerHTML = `
+        <div class="flex items-center space-x-3">
+          <div class="w-6 h-6 bg-green-400 rounded-full animate-pulse"></div>
+          <span>🏁 ${message}</span>
+        </div>
+      `
+      document.body.appendChild(toast)
+      
+      // Animate in
+      toast.style.transform = 'translateX(100%)'
+      setTimeout(() => {
+        toast.style.transform = 'translateX(0)'
+        toast.style.transition = 'transform 0.5s ease-out'
+      }, 100)
+      
+      // Remove after 4 seconds
+      setTimeout(() => {
+        toast.style.transform = 'translateX(100%)'
+        setTimeout(() => document.body.removeChild(toast), 500)
+      }, 4000)
+    }
+  }, [message])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // Simulate login process
-    setTimeout(() => {
+    setError("")
+    
+    try {
+      const isAuthenticated = await authenticateUser(email, password)
+      
+      if (isAuthenticated) {
+        // Show success toast
+        const toast = document.createElement('div')
+        toast.className = 'fixed top-4 right-4 bg-gradient-to-r from-green-600 to-green-800 text-white px-6 py-4 rounded-xl shadow-lg z-[10000] font-bold tracking-wider'
+        toast.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <div class="w-6 h-6 bg-green-400 rounded-full animate-pulse"></div>
+            <span>🏁 WELCOME BACK, CHAMPION!</span>
+          </div>
+        `
+        document.body.appendChild(toast)
+        
+        // Animate in
+        toast.style.transform = 'translateX(100%)'
+        setTimeout(() => {
+          toast.style.transform = 'translateX(0)'
+          toast.style.transition = 'transform 0.5s ease-out'
+        }, 100)
+        
+        setIsLoading(false)
+        
+        // Navigate to home page after 1.5 seconds
+        setTimeout(() => {
+          document.body.removeChild(toast)
+          router.push('/')
+        }, 1500)
+      } else {
+        setIsLoading(false)
+        setError("Invalid email or password. Please check your credentials.")
+      }
+    } catch (error) {
       setIsLoading(false)
-      // Redirect to dashboard or previous page
-    }, 2000)
+      setError("Login failed. Please try again.")
+    }
   }
 
   return (
@@ -102,6 +171,17 @@ export default function LoginPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Error Message */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-900/50 border border-red-600/50 text-red-400 px-4 py-3 rounded-lg text-sm"
+                >
+                  {error}
+                </motion.div>
+              )}
 
               <Button
                 type="submit"
