@@ -5,7 +5,7 @@ A minimal yet immersive e-commerce prototype built on **Framer** and **Next.js A
 ---
 
 ## 🚀 Live Preview
-> Coming Soon – [Framer Link]
+**Check it out here:** 👉 [apexrace.netlify.app](https://apexrace.netlify.app/)
 
 ---
 
