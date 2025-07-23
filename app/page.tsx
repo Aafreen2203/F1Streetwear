@@ -736,42 +736,6 @@ export default function HomePage() {
                   />
                 </Button>
               </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onMouseEnter={() => setIsHovering(true)}
-                onMouseLeave={() => setIsHovering(false)}
-              >
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-red-500 text-red-400 hover:bg-red-500/10 px-12 py-4 text-lg font-bold tracking-wider bg-transparent relative group overflow-hidden"
-                >
-                  <Play className="w-6 h-6 mr-3 relative z-10" />
-                  <span className="relative z-10">WATCH TRAILER</span>
-                  
-                  <motion.div 
-                    className="absolute inset-0 bg-red-500/10 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" 
-                  />
-                  
-                  {/* Pulsing border effect */}
-                  <motion.div
-                    className="absolute inset-0 border-2 border-red-400/50 rounded-lg"
-                    animate={{
-                      borderColor: [
-                        'rgba(248, 113, 113, 0.5)',
-                        'rgba(239, 68, 68, 1)',
-                        'rgba(248, 113, 113, 0.5)',
-                      ],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Number.POSITIVE_INFINITY,
-                    }}
-                  />
-                </Button>
-              </motion.div>
             </motion.div>
           </motion.div>
         </div>
