@@ -87,6 +87,46 @@ const products = [
   },
 ]
 
+// Coming Soon products with progress animations
+const comingSoonProducts = [
+  {
+    id: 101,
+    name: "SPEED JACKETS",
+    category: "Premium Collection",
+    image: "/SpeedJackets.jpg",
+    status: "COMING SOON",
+    progress: 75,
+    itemCount: "12 ITEMS",
+  },
+  {
+    id: 102,
+    name: "VICTORY CAPS",
+    category: "Championship Collection",
+    image: "/ChamCap.jpg",
+    status: "COMING SOON",
+    progress: 45,
+    itemCount: "8 ITEMS",
+  },
+  {
+    id: 103,
+    name: "TRACK GEAR",
+    category: "Professional Series",
+    image: "/TrackGear.jpg",
+    status: "COMING SOON",
+    progress: 30,
+    itemCount: "15 ITEMS",
+  },
+  {
+    id: 104,
+    name: "LIMITED DROPS",
+    category: "Exclusive Collection",
+    image: "/LimitedEditions.jpg",
+    status: "COMING SOON",
+    progress: 60,
+    itemCount: "6 ITEMS",
+  },
+]
+
 export default function ProductsPage() {
   const router = useRouter()
   const { startLoading } = useLoading()
@@ -293,6 +333,109 @@ export default function ProductsPage() {
         {/* Products Grid */}
         <section className="py-12">
           <div className="container mx-auto px-4">
+            {/* Coming Soon Section */}
+            <div className="mb-16">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center mb-12"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">
+                  🏁 COMING SOON
+                </h2>
+                <p className="text-gray-400 font-mono tracking-wider">
+                  GET READY FOR THE NEXT WAVE OF F1 GEAR
+                </p>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {comingSoonProducts.map((product, index) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -5 }}
+                    className="group relative bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-red-600/50 transition-all duration-300"
+                  >
+                    <div className="relative h-64 overflow-hidden">
+                      <Image
+                        src={product.image || "/placeholder.svg"}
+                        alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500 brightness-75"
+                      />
+                      
+                      {/* Status Badge */}
+                      <Badge className="absolute top-4 left-4 bg-yellow-600/90 text-black font-bold">
+                        {product.status}
+                      </Badge>
+                      
+                      {/* Item Count Badge */}
+                      <Badge className="absolute top-4 right-4 bg-red-600/90 text-white font-mono">
+                        {product.itemCount}
+                      </Badge>
+
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                      
+                      {/* Title */}
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <h3 className="text-xl font-black text-white mb-1 tracking-wider">
+                          {product.name}
+                        </h3>
+                        <p className="text-sm text-gray-300 font-mono">
+                          {product.category}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="p-4 bg-gray-900">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs text-gray-400 font-mono">DEVELOPMENT</span>
+                        <span className="text-xs text-red-400 font-mono font-bold">{product.progress}%</span>
+                      </div>
+                      <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                        <motion.div
+                          className="h-full bg-gradient-to-r from-red-500 to-red-600"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${product.progress}%` }}
+                          transition={{ duration: 2, delay: index * 0.2, ease: "easeOut" }}
+                        />
+                      </div>
+                      <div className="mt-3 text-center">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-red-600/50 text-red-400 hover:bg-red-600/10 font-mono text-xs w-full"
+                          disabled
+                        >
+                          🔔 NOTIFY ME
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Available Products Section */}
+            <div className="mb-8">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center mb-8"
+              >
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">
+                  🏎️ AVAILABLE NOW
+                </h2>
+                <p className="text-gray-400">
+                  Shop our current collection of F1-inspired streetwear
+                </p>
+              </motion.div>
+            </div>
+
             {filteredProducts.length === 0 ? (
               <motion.div 
                 initial={{ opacity: 0, y: 30 }} 

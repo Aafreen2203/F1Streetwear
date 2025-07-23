@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShoppingCart, User, Search, Heart, Zap, Trophy, Flag, Play } from "lucide-react"
+import { ShoppingCart, User, Search, Heart, Zap, Trophy, Flag, Play, ChevronDown } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from "framer-motion"
@@ -97,9 +97,14 @@ export default function HomePage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentUser, setCurrentUser] = useState<string | null>(null)
+  const [mouseTrail, setMouseTrail] = useState<{ x: number; y: number; id: number }[]>([])
+  const [isLoadingEffect, setIsLoadingEffect] = useState(false)
+  const [sparkles, setSparkles] = useState<{ x: number; y: number; id: number }[]>([])
 
   // Navigation with loading
   const navigateWithLoading = (path: string) => {
+    setIsLoadingEffect(true)
+    setTimeout(() => setIsLoadingEffect(false), 1000)
     startLoading()
     router.push(path)
   }
@@ -110,14 +115,33 @@ export default function HomePage() {
     setCurrentUser(getCurrentUser())
   }, [])
 
-  // Custom cursor tracking
+  // Custom cursor tracking with mouse trail
   useEffect(() => {
     const updateCursor = (e: MouseEvent) => {
       setCursorPosition({ x: e.clientX, y: e.clientY })
+      
+      // Add mouse trail
+      const newTrail = { x: e.clientX, y: e.clientY, id: Date.now() }
+      setMouseTrail(prev => [...prev.slice(-8), newTrail])
+      
+      // Add sparkles occasionally
+      if (Math.random() < 0.1) {
+        const newSparkle = { x: e.clientX + (Math.random() - 0.5) * 40, y: e.clientY + (Math.random() - 0.5) * 40, id: Date.now() }
+        setSparkles(prev => [...prev.slice(-5), newSparkle])
+      }
     }
     
     window.addEventListener('mousemove', updateCursor)
     return () => window.removeEventListener('mousemove', updateCursor)
+  }, [])
+
+  // Clean up old trail and sparkles
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMouseTrail(prev => prev.slice(-5))
+      setSparkles(prev => prev.slice(-3))
+    }, 50)
+    return () => clearInterval(interval)
   }, [])
 
   // Smooth scroll function
@@ -213,7 +237,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden relative cursor-none">
-      {/* Custom F1 Cursor */}
+      {/* Advanced Custom F1 Cursor with Trail */}
       <motion.div
         className="fixed top-0 left-0 w-8 h-8 pointer-events-none z-[9999] mix-blend-difference"
         style={{
@@ -221,15 +245,73 @@ export default function HomePage() {
           y: cursorPosition.y - 16,
         }}
         animate={{
-          scale: isHovering ? 1.5 : 1,
-          rotate: isHovering ? 180 : 0,
+          scale: isHovering ? 1.8 : 1,
+          rotate: isHovering ? 360 : 0,
         }}
         transition={{ type: "spring", stiffness: 500, damping: 30 }}
       >
-        <div className="w-full h-full bg-red-500 rounded-full flex items-center justify-center">
+        <div className="w-full h-full bg-gradient-to-r from-red-500 to-yellow-400 rounded-full flex items-center justify-center relative">
           <div className="w-4 h-4 border-2 border-white rounded-full" />
+          {/* Cursor glow */}
+          <div className="absolute inset-0 bg-red-500 rounded-full blur-lg opacity-50 animate-pulse" />
+          {/* Racing stripes */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full animate-spin" />
         </div>
       </motion.div>
+
+      {/* Mouse Trail Effect */}
+      {mouseTrail.map((point, index) => (
+        <motion.div
+          key={point.id}
+          className="fixed w-3 h-3 bg-red-400 rounded-full pointer-events-none z-[9998] mix-blend-screen"
+          style={{
+            x: point.x - 6,
+            y: point.y - 6,
+          }}
+          initial={{ opacity: 0.8, scale: 1 }}
+          animate={{ 
+            opacity: 0, 
+            scale: 0.2,
+          }}
+          transition={{ duration: 0.5 }}
+        />
+      ))}
+
+      {/* Sparkle Effects */}
+      {sparkles.map((sparkle) => (
+        <motion.div
+          key={sparkle.id}
+          className="fixed w-1 h-1 bg-yellow-300 rounded-full pointer-events-none z-[9997]"
+          style={{
+            x: sparkle.x,
+            y: sparkle.y,
+          }}
+          initial={{ opacity: 1, scale: 1 }}
+          animate={{ 
+            opacity: 0, 
+            scale: 0,
+            rotate: 360,
+          }}
+          transition={{ duration: 1 }}
+        />
+      ))}
+
+      {/* Global Loading Effect */}
+      <AnimatePresence>
+        {isLoadingEffect && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9996] pointer-events-none"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-red-900/20 via-transparent to-red-900/20 animate-pulse" />
+            <div className="absolute inset-0 opacity-30">
+              <div className="w-full h-full bg-gradient-to-r from-red-500/10 via-transparent to-red-500/10 animate-pulse" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
    
       {/* Animated Background Particles */}
       <div className="fixed inset-0 z-0">
@@ -255,13 +337,27 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* Navigation */}
+      {/* Enhanced Navigation with Holographic Effect */}
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-xl border-b border-red-500/20"
+        className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-xl border-b border-red-500/20 overflow-hidden"
       >
-        <div className="container mx-auto px-4 py-4">
+        {/* Holographic Background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-purple-500/5 to-blue-500/5 opacity-50" />
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
+          animate={{
+            x: ['-100%', '100%'],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "linear",
+          }}
+        />
+        
+        <div className="container mx-auto px-4 py-4 relative z-10">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-3">
               <div className="relative">
@@ -580,55 +676,141 @@ export default function HomePage() {
               PREMIUM F1-INSPIRED STREETWEAR FOR CHAMPIONS WHO DOMINATE THE STREETS
             </motion.p>
 
-            {/* CTA Buttons */}
+            {/* Enhanced CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center"
             >
-              <Button
-                size="lg"
-                onClick={() => navigateWithLoading('/products')}
-                className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-12 py-4 text-lg font-bold tracking-wider border-0 relative group overflow-hidden cursor-pointer"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
               >
-                <Trophy className="w-6 h-6 mr-3" />
-                ENTER THE RACE
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-              </Button>
+                <Button
+                  size="lg"
+                  onClick={() => navigateWithLoading('/products')}
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-12 py-4 text-lg font-bold tracking-wider border-0 relative group overflow-hidden cursor-pointer"
+                >
+                  <Trophy className="w-6 h-6 mr-3 relative z-10" />
+                  <span className="relative z-10">ENTER THE RACE</span>
+                  
+                  {/* Multiple overlay effects */}
+                  <motion.div 
+                    className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent"
+                    initial={{ x: '-100%' }}
+                    whileHover={{ 
+                      x: ['100%', '200%'],
+                      transition: { 
+                        duration: 0.6,
+                        ease: "easeOut"
+                      }
+                    }}
+                  />
+                  
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/30 via-red-500/30 to-orange-600/30"
+                    animate={{
+                      opacity: [0, 0.3, 0],
+                      scale: [0.8, 1.1, 0.8],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                    }}
+                  />
+                  
+                  {/* Particle burst on hover */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    whileHover={{
+                      background: [
+                        'radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0) 0%, rgba(239, 68, 68, 0) 100%)',
+                        'radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0) 70%)',
+                        'radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0) 0%, rgba(239, 68, 68, 0) 100%)',
+                      ],
+                    }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </Button>
+              </motion.div>
 
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-2 border-red-500 text-red-400 hover:bg-red-500/10 px-12 py-4 text-lg font-bold tracking-wider bg-transparent relative group overflow-hidden"
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
               >
-                <Play className="w-6 h-6 mr-3" />
-                WATCH TRAILER
-                <div className="absolute inset-0 bg-red-500/10 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-red-500 text-red-400 hover:bg-red-500/10 px-12 py-4 text-lg font-bold tracking-wider bg-transparent relative group overflow-hidden"
+                >
+                  <Play className="w-6 h-6 mr-3 relative z-10" />
+                  <span className="relative z-10">WATCH TRAILER</span>
+                  
+                  <motion.div 
+                    className="absolute inset-0 bg-red-500/10 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" 
+                  />
+                  
+                  {/* Pulsing border effect */}
+                  <motion.div
+                    className="absolute inset-0 border-2 border-red-400/50 rounded-lg"
+                    animate={{
+                      borderColor: [
+                        'rgba(248, 113, 113, 0.5)',
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(248, 113, 113, 0.5)',
+                      ],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Number.POSITIVE_INFINITY,
+                    }}
+                  />
+                </Button>
+              </motion.div>
             </motion.div>
           </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
-        {/* <motion.div
+        {/* Dynamic Scroll Arrows */}
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
         >
-          <motion.div
-            animate={{ y: [0, 15, 0] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-            className="w-8 h-12 border-2 border-red-500/50 rounded-full flex justify-center relative"
-          >
-            <motion.div
-              animate={{ y: [0, 20, 0] }}
-              transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-              className="w-1 h-4 bg-gradient-to-b from-red-500 to-transparent rounded-full mt-2"
-            />
-          </motion.div>
-        </motion.div> */}
+          <div className="flex flex-col items-center space-y-2">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                animate={{ 
+                  y: [0, 10, 0],
+                  opacity: [0.3, 1, 0.3],
+                }}
+                transition={{ 
+                  duration: 1.5,
+                  repeat: Number.POSITIVE_INFINITY,
+                  delay: i * 0.2,
+                }}
+                className="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[12px] border-t-red-500"
+              />
+            ))}
+            <motion.p
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ 
+                duration: 2,
+                repeat: Number.POSITIVE_INFINITY,
+              }}
+              className="text-red-400 text-xs font-mono tracking-wider mt-2"
+            >
+              SCROLL FOR MORE
+            </motion.p>
+          </div>
+        </motion.div>
       </motion.section>
 
       {/* View All Products Section */}
@@ -927,10 +1109,10 @@ export default function HomePage() {
                     onMouseEnter={() => setIsHovering(true)}
                     onMouseLeave={() => setIsHovering(false)}
                   >
-                    <ShoppingCart className="w-5 h-5 mr-2" />
-                    ACQUIRE NOW
+                    <ShoppingCart className="w-5 h-5 mr-2 relative z-10" />
+                    <span className="relative z-10">ACQUIRE NOW</span>
                     
-                    {/* Engine Ignition Pulse */}
+                    {/* Enhanced button effects */}
                     <motion.div
                       className="absolute inset-0 bg-gradient-to-r from-yellow-400/30 via-red-500/30 to-orange-600/30"
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -945,7 +1127,17 @@ export default function HomePage() {
                       }}
                     />
                     
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" 
+                    />
+                    
+                    {/* Racing stripe effect */}
+                    <motion.div
+                      className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-orange-500"
+                      initial={{ scaleX: 0 }}
+                      whileHover={{ scaleX: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
                   </Button>
                 </div>
               </motion.div>
@@ -997,9 +1189,35 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-black border-t border-red-500/20 py-16 relative">
+      {/* Enhanced Footer */}
+      <footer className="bg-black border-t border-red-500/20 py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-red-900/10 to-transparent" />
+        
+        {/* Animated background grid */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="w-full h-full bg-[linear-gradient(90deg,rgba(239,68,68,0.1)_1px,transparent_1px),linear-gradient(rgba(239,68,68,0.1)_1px,transparent_1px)] bg-[size:50px_50px]" />
+        </div>
+        
+        {/* Floating particles in footer */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={`footer-particle-${i}`}
+            className="absolute w-1 h-1 bg-red-400/30 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -20, 0],
+              opacity: [0.3, 1, 0.3],
+            }}
+            transition={{
+              duration: Math.random() * 3 + 2,
+              repeat: Number.POSITIVE_INFINITY,
+              delay: Math.random() * 2,
+            }}
+          />
+        ))}
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
@@ -1056,6 +1274,48 @@ export default function HomePage() {
 
       {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* Floating Action Menu */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 1 }}
+        className="fixed bottom-8 right-8 z-40"
+      >
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className="relative"
+        >
+          <Button
+            size="lg"
+            onClick={() => navigateWithLoading('/products')}
+            className="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white border-0 shadow-2xl relative overflow-hidden group"
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+          >
+            <ShoppingCart className="w-6 h-6" />
+            
+            {/* Pulsing ring */}
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-red-400"
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [1, 0, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Number.POSITIVE_INFINITY,
+              }}
+            />
+            
+            {/* Notification badge */}
+            <Badge className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-yellow-500 text-black text-xs font-bold animate-bounce">
+              {cartState.itemCount}
+            </Badge>
+          </Button>
+        </motion.div>
+      </motion.div>
     </div>
   )
 }
