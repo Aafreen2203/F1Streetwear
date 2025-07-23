@@ -8,11 +8,21 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { useCart } from "@/contexts/CartContext"
+import { useRouter } from "next/navigation"
+import { useLoading } from "@/contexts/LoadingContext"
 
 export default function CartPage() {
+  const router = useRouter()
+  const { startLoading } = useLoading()
   const { state: cartState, updateQuantity, removeFromCart } = useCart()
   const [promoCode, setPromoCode] = useState("")
   const [discount, setDiscount] = useState(0)
+
+  // Navigation with loading
+  const navigateWithLoading = (path: string) => {
+    startLoading()
+    router.push(path)
+  }
 
   const applyPromoCode = () => {
     if (promoCode.toLowerCase() === "racing10") {
@@ -36,7 +46,10 @@ export default function CartPage() {
       <nav className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md border-b border-red-600/20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigateWithLoading('/')}
+              className="flex items-center space-x-3 bg-transparent border-0 cursor-pointer"
+            >
               <div className="relative">
                 <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-red-700 rounded-lg flex items-center justify-center transform rotate-45">
                   <Flag className="w-5 h-5 text-white transform -rotate-45" />
@@ -46,7 +59,7 @@ export default function CartPage() {
               <span className="text-xl font-bold bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
                 APEX RACING
               </span>
-            </Link>
+            </button>
 
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="icon" className="hover:bg-red-600/20">
@@ -58,11 +71,14 @@ export default function CartPage() {
                   {cartState.itemCount}
                 </Badge>
               </Button>
-              <Link href="/login">
-                <Button variant="ghost" size="icon" className="hover:bg-red-600/20">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover:bg-red-600/20"
+                onClick={() => navigateWithLoading('/login')}
+              >
                   <User className="w-5 h-5" />
                 </Button>
-              </Link>
             </div>
           </div>
         </div>
@@ -79,12 +95,14 @@ export default function CartPage() {
             >
               <div>
                 <div className="flex items-center space-x-4 mb-4">
-                  <Link href="/products">
-                    <Button variant="ghost" className="text-red-400 hover:text-white hover:bg-red-600/20">
-                      <ArrowLeft className="w-4 h-4 mr-2" />
-                      Continue Shopping
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="text-red-400 hover:text-white hover:bg-red-600/20"
+                    onClick={() => navigateWithLoading('/products')}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Continue Shopping
+                  </Button>
                 </div>
                 <h1 className="text-4xl font-black mb-2">YOUR CART</h1>
                 <p className="text-gray-400">
@@ -109,11 +127,12 @@ export default function CartPage() {
                 </div>
                 <h2 className="text-3xl font-bold mb-4">Your cart is empty</h2>
                 <p className="text-gray-400 mb-8">Start shopping to add items to your cart</p>
-                <Link href="/products">
-                  <Button className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-8 py-3">
-                    Browse Products
-                  </Button>
-                </Link>
+                <Button 
+                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-8 py-3"
+                  onClick={() => navigateWithLoading('/products')}
+                >
+                  Browse Products
+                </Button>
               </motion.div>
             ) : (
               <div className="grid lg:grid-cols-3 gap-12">

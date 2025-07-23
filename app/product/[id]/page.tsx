@@ -21,7 +21,9 @@ import {
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
+import { useCart } from "@/contexts/CartContext"
+import { useLoading } from "@/contexts/LoadingContext"
 
 const productData = {
   1: {
@@ -115,6 +117,9 @@ const productData = {
 
 export default function ProductPage() {
   const params = useParams()
+  const router = useRouter()
+  const { startLoading } = useLoading()
+  const { addToCart, state: cartState } = useCart()
   const id = Number.parseInt(params.id as string)
   const product = productData[id as keyof typeof productData]
 
@@ -133,9 +138,15 @@ export default function ProductPage() {
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
-          <Link href="/products">
-            <Button className="bg-red-600 hover:bg-red-700">Back to Products</Button>
-          </Link>
+          <Button 
+            onClick={() => {
+              startLoading()
+              router.push('/products')
+            }}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            Back to Products
+          </Button>
         </div>
       </div>
     )
@@ -147,30 +158,48 @@ export default function ProductPage() {
       <nav className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md border-b border-red-600/20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
+            <button 
+              onClick={() => {
+                startLoading()
+                router.push('/')
+              }}
+              className="flex items-center space-x-2 bg-transparent border-0 cursor-pointer"
+            >
               <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center">
                 <Flag className="w-4 h-4 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
                 APEX RACING
               </span>
-            </Link>
+            </button>
 
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="icon" className="hover:bg-red-600/20">
                 <Heart className="w-5 h-5" />
               </Button>
-              <Link href="/cart">
-                <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative">
-                  <ShoppingCart className="w-5 h-5" />
-                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-600 text-xs">3</Badge>
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="ghost" size="icon" className="hover:bg-red-600/20">
-                  <User className="w-5 h-5" />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover:bg-red-600/20 relative"
+                onClick={() => {
+                  startLoading()
+                  router.push('/cart')
+                }}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-600 text-xs">{cartState.itemCount}</Badge>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover:bg-red-600/20"
+                onClick={() => {
+                  startLoading()
+                  router.push('/login')
+                }}
+              >
+                <User className="w-5 h-5" />
+              </Button>
             </div>
           </div>
         </div>
@@ -180,17 +209,35 @@ export default function ProductPage() {
         {/* Breadcrumb */}
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-2 text-sm text-gray-400">
-            <Link href="/" className="hover:text-red-400 transition-colors">
+            <button 
+              onClick={() => {
+                startLoading()
+                router.push('/')
+              }}
+              className="hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer"
+            >
               Home
-            </Link>
+            </button>
             <span>/</span>
-            <Link href="/products" className="hover:text-red-400 transition-colors">
+            <button 
+              onClick={() => {
+                startLoading()
+                router.push('/products')
+              }}
+              className="hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer"
+            >
               Products
-            </Link>
+            </button>
             <span>/</span>
-            <Link href={`/category/racing-tees`} className="hover:text-red-400 transition-colors">
+            <button 
+              onClick={() => {
+                startLoading()
+                router.push(`/category/racing-tees`)
+              }}
+              className="hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer"
+            >
               {product.category}
-            </Link>
+            </button>
             <span>/</span>
             <span className="text-white">{product.name}</span>
           </div>

@@ -611,7 +611,7 @@ export default function HomePage() {
         </div>
 
         {/* Scroll Indicator */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
@@ -628,7 +628,7 @@ export default function HomePage() {
               className="w-1 h-4 bg-gradient-to-b from-red-500 to-transparent rounded-full mt-2"
             />
           </motion.div>
-        </motion.div>
+        </motion.div> */}
       </motion.section>
 
       {/* View All Products Section */}

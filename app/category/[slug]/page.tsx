@@ -8,8 +8,9 @@ import { ShoppingCart, User, Search, Heart, ArrowLeft, Grid, List, Flag } from "
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useCart } from "@/contexts/CartContext"
+import { useLoading } from "@/contexts/LoadingContext"
 
 const categoryProducts = {
   "racing-tees": [
@@ -72,6 +73,8 @@ const categoryProducts = {
 
 export default function CategoryPage() {
   const { addToCart, state: cartState } = useCart()
+  const router = useRouter()
+  const { startLoading } = useLoading()
   const params = useParams()
   const slug = params.slug as string
   const [searchQuery, setSearchQuery] = useState("")
@@ -122,30 +125,48 @@ export default function CategoryPage() {
       <nav className="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-md border-b border-red-600/20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
+            <button 
+              onClick={() => {
+                startLoading()
+                router.push('/')
+              }}
+              className="flex items-center space-x-2 bg-transparent border-0 cursor-pointer"
+            >
               <div className="w-8 h-8 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center">
                 <Flag className="w-4 h-4 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
                 APEX RACING
               </span>
-            </Link>
+            </button>
 
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="icon" className="hover:bg-red-600/20">
                 <Heart className="w-5 h-5" />
               </Button>
-              <Link href="/cart">
-                <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative">
-                  <ShoppingCart className="w-5 h-5" />
-                  <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-600 text-xs">{cartState.itemCount}</Badge>
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="ghost" size="icon" className="hover:bg-red-600/20">
-                  <User className="w-5 h-5" />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover:bg-red-600/20 relative"
+                onClick={() => {
+                  startLoading()
+                  router.push('/cart')
+                }}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-600 text-xs">{cartState.itemCount}</Badge>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover:bg-red-600/20"
+                onClick={() => {
+                  startLoading()
+                  router.push('/login')
+                }}
+              >
+                <User className="w-5 h-5" />
+              </Button>
             </div>
           </div>
         </div>
@@ -155,9 +176,15 @@ export default function CategoryPage() {
         {/* Breadcrumb */}
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-2 text-sm text-gray-400">
-            <Link href="/" className="hover:text-red-400 transition-colors">
+            <button 
+              onClick={() => {
+                startLoading()
+                router.push('/')
+              }}
+              className="hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer"
+            >
               Home
-            </Link>
+            </button>
             <span>/</span>
             <span className="text-white">{categoryName}</span>
           </div>
@@ -172,13 +199,16 @@ export default function CategoryPage() {
               className="flex items-center justify-between"
             >
               <div>
-                <Link
-                  href="/"
-                  className="inline-flex items-center text-gray-400 hover:text-red-400 transition-colors mb-4"
+                <button
+                  onClick={() => {
+                    startLoading()
+                    router.push('/')
+                  }}
+                  className="inline-flex items-center text-gray-400 hover:text-red-400 transition-colors mb-4 bg-transparent border-0 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Home
-                </Link>
+                </button>
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">
                   {categoryName}
                 </h1>
@@ -277,7 +307,13 @@ export default function CategoryPage() {
                       viewMode === "list" ? "flex" : ""
                     }`}
                   >
-                    <Link href={`/product/${product.id}`}>
+                    <div 
+                      onClick={() => {
+                        startLoading()
+                        router.push(`/product/${product.id}`)
+                      }}
+                      className="cursor-pointer"
+                    >
                       <div className={`relative overflow-hidden ${viewMode === "list" ? "w-48 h-48" : "h-80"}`}>
                         <Image
                           src={product.image || "/placeholder.svg"}
@@ -336,7 +372,7 @@ export default function CategoryPage() {
                           Add to Cart
                         </Button>
                       </div>
-                    </Link>
+                    </div>
                   </motion.div>
                 ))}
               </div>
