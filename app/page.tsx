@@ -11,6 +11,7 @@ import { submitToGoogleSheets, isUserAuthenticated, getCurrentUser, logoutUser }
 import { useCart } from "@/contexts/CartContext"
 import { CartDrawer } from "@/components/CartDrawer"
 import { useRouter } from "next/navigation"
+import { useLoading } from "@/contexts/LoadingContext"
 
 
 const categories = [
@@ -85,6 +86,7 @@ const featuredProducts = [
 
 export default function HomePage() {
   const router = useRouter()
+  const { startLoading } = useLoading()
   const { state: cartState } = useCart()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [newsletterEmail, setNewsletterEmail] = useState("")
@@ -95,6 +97,12 @@ export default function HomePage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentUser, setCurrentUser] = useState<string | null>(null)
+
+  // Navigation with loading
+  const navigateWithLoading = (path: string) => {
+    startLoading()
+    router.push(path)
+  }
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -330,12 +338,15 @@ export default function HomePage() {
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                 </div>
               ) : (
-                <Link href="/login">
-                  <Button variant="ghost" size="icon" className="hover:bg-red-600/20 relative group">
-                    <User className="w-5 h-5" />
-                    <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
-                  </Button>
-                </Link>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="hover:bg-red-600/20 relative group cursor-pointer"
+                  onClick={() => navigateWithLoading('/login')}
+                >
+                  <User className="w-5 h-5" />
+                  <div className="absolute inset-0 bg-red-500/20 rounded-lg scale-0 group-hover:scale-100 transition-transform" />
+                </Button>
               )}
             </div>
           </div>
@@ -576,16 +587,15 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.8 }}
               className="flex flex-col sm:flex-row gap-6 justify-center items-center"
             >
-              <Link href="/products">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-12 py-4 text-lg font-bold tracking-wider border-0 relative group overflow-hidden"
-                >
-                  <Trophy className="w-6 h-6 mr-3" />
-                  ENTER THE RACE
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                onClick={() => navigateWithLoading('/products')}
+                className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-12 py-4 text-lg font-bold tracking-wider border-0 relative group overflow-hidden cursor-pointer"
+              >
+                <Trophy className="w-6 h-6 mr-3" />
+                ENTER THE RACE
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              </Button>
 
               <Button
                 size="lg"
@@ -638,13 +648,13 @@ export default function HomePage() {
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
-            <Link href="/products">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-16 py-6 text-xl font-bold tracking-wider border-0 relative group overflow-hidden"
-              >
-                <ShoppingCart className="w-6 h-6 mr-3" />
-                VIEW ALL PRODUCTS
+            <Button
+              size="lg"
+              onClick={() => navigateWithLoading('/products')}
+              className="bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white px-16 py-6 text-xl font-bold tracking-wider border-0 relative group overflow-hidden cursor-pointer"
+            >
+              <ShoppingCart className="w-6 h-6 mr-3" />
+              VIEW ALL PRODUCTS
                 
                 {/* Racing Line Animation */}
                 <motion.div 
@@ -673,7 +683,6 @@ export default function HomePage() {
                   }}
                 />
               </Button>
-            </Link>
           </motion.div>
         </div>
       </motion.section>

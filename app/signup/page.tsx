@@ -13,9 +13,11 @@ import Image from "next/image"
 import { motion } from "framer-motion"
 import { submitToGoogleSheets } from "@/lib/googleSheets"
 import { useRouter } from "next/navigation"
+import { useLoading } from "@/contexts/LoadingContext"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const { startLoading } = useLoading()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -85,6 +87,7 @@ export default function SignUpPage() {
       // Navigate to login page after 2 seconds
       setTimeout(() => {
         document.body.removeChild(toast)
+        startLoading()
         router.push('/login?message=Account created successfully. Please sign in.')
       }, 2000)
       

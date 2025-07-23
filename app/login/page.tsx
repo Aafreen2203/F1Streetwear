@@ -13,9 +13,11 @@ import { motion } from "framer-motion"
 import { authenticateUser } from "@/lib/googleSheets"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
+import { useLoading } from "@/contexts/LoadingContext"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { startLoading } = useLoading()
   const searchParams = useSearchParams()
   const message = searchParams.get('message')
   const [showPassword, setShowPassword] = useState(false)
@@ -84,6 +86,7 @@ export default function LoginPage() {
         // Navigate to home page after 1.5 seconds
         setTimeout(() => {
           document.body.removeChild(toast)
+          startLoading()
           router.push('/')
         }, 1500)
       } else {
@@ -109,14 +112,20 @@ export default function LoginPage() {
           >
             {/* Header */}
             <div className="text-center">
-              <Link href="/" className="inline-flex items-center space-x-2 mb-8">
+              <button 
+                onClick={() => {
+                  startLoading()
+                  router.push('/')
+                }}
+                className="inline-flex items-center space-x-2 mb-8 bg-transparent border-0 cursor-pointer"
+              >
                 <div className="w-10 h-10 bg-gradient-to-r from-red-600 to-red-800 rounded-full flex items-center justify-center">
                   <Flag className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-2xl font-bold bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
                   APEX RACING
                 </span>
-              </Link>
+              </button>
 
               <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
               <p className="text-gray-400">Sign in to your racing account</p>
@@ -250,18 +259,30 @@ export default function LoginPage() {
             <div className="text-center">
               <p className="text-gray-400">
                 Don't have an account?{" "}
-                <Link href="/signup" className="text-red-400 hover:text-red-300 font-medium transition-colors">
+                <button 
+                  onClick={() => {
+                    startLoading()
+                    router.push('/signup')
+                  }}
+                  className="text-red-400 hover:text-red-300 font-medium transition-colors bg-transparent border-0 cursor-pointer"
+                >
                   Sign up for free
-                </Link>
+                </button>
               </p>
             </div>
 
             {/* Back to Home */}
             <div className="text-center">
-              <Link href="/" className="inline-flex items-center text-gray-400 hover:text-red-400 transition-colors">
+              <button 
+                onClick={() => {
+                  startLoading()
+                  router.push('/')
+                }}
+                className="inline-flex items-center text-gray-400 hover:text-red-400 transition-colors bg-transparent border-0 cursor-pointer"
+              >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
-              </Link>
+              </button>
             </div>
           </motion.div>
         </div>
